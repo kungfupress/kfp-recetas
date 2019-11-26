@@ -62,6 +62,7 @@ function kfp_receta_register_post_type() {
 		'exclude_from_search' => false,
 		'publicly_queryable'  => true,
 		'capability_type'     => 'page',
+		'show_in_rest'        => true,
 	);
 	register_post_type( 'receta', $args );
 	$set = get_option( 'post_type_rules_flased_receta' );
@@ -114,7 +115,6 @@ function kfp_receta_info_output_meta_box( $post ) {
 	$tiempo_preparacion = $post->_tiempo_preparacion;
 	$comensales         = $post->_comensales;
 	wp_nonce_field( 'graba_receta', 'receta_nonce' );
-
 	echo( '<label for="tiempo_preparacion">' . __( 'Tiempo de preparación', 'text_domain' ) . '</label>' );
 	echo( '&nbsp; <input type="text" name="tiempo_preparacion" id="tiempo_preparacion" value="' . esc_attr( $tiempo_preparacion ) . '">' );
 	echo( '<p><label for="comensales">' . __( 'Comensales', 'text_domain' ) . '</label>' );
@@ -122,18 +122,22 @@ function kfp_receta_info_output_meta_box( $post ) {
 }
 
 function kfp_receta_ingredientes_output_meta_box( $post ) {
-	// Cuidado, aquí parece que hay que usar la función y no la propiedad del objeto: $post->_ingredientes
+	// Cuidado, aquí parece que hay que usar la función y no la propiedad del objeto: $post->_ingredientes.
 	$ingredientes = get_post_meta( $post->ID, '_ingredientes', true );
 	echo( '<div id="postdivrich" class="postarea">' );
-	wp_editor( $ingredientes, 'ingredientes', array(
-		'drag_drop_upload'  => true,
-		'tabfocus_elements' => 'content-html,save-post',
-		'editor_height'     => 200,
-		'tinymce'           => array(
-			'resize'             => false,
-			'add_unload_trigger' => false,
-		),
-	) );
+	wp_editor(
+		$ingredientes,
+		'ingredientes',
+		array(
+			'drag_drop_upload'  => true,
+			'tabfocus_elements' => 'content-html,save-post',
+			'editor_height'     => 200,
+			'tinymce'           => array(
+				'resize'             => false,
+				'add_unload_trigger' => false,
+			),
+		)
+	);
 	echo( '</div>' );
 }
 
