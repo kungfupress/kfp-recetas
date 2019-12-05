@@ -1,18 +1,21 @@
 <?php
 /**
-* Plugin Name:    KFP Recetas
-* Plugin Author:  Juanan Ruiz
-* Plugin URI:     https://kungfupress.com/recetario_de_cocina_con_wordpress/
-* Description:    Un plugin para aprender a programar WP practicando con un gestor de recetas.
-* Text Domain:    kfp-recetas
-*
-* @package kfp_recetas
-*/
+ * Plugin Name:    KFP Recetas
+ * Plugin Author:  Juanan Ruiz
+ * Plugin URI:     https://kungfupress.com/recetario_de_cocina_con_wordpress/
+ * Description:    Un plugin para aprender a programar WP practicando con un gestor de recetas.
+ * Text Domain:    kfp-recetas
+ *
+ * @package kfp_recetas
+ */
 
 global $content;
 global $post;
 global $query;
 
+define( 'KFP_RECETA_PLUGIN_URL', WP_PLUGIN_URL . '/kfp-recetas' );
+
+add_action( 'init', 'kfp_receta_register_post_type', 0 );
 /**
  * Register Custom Post Type
  */
@@ -74,8 +77,8 @@ function kfp_receta_register_post_type() {
 		update_option( 'post_type_rules_flased_receta', true );
 	}
 }
-add_action( 'init', 'kfp_receta_register_post_type', 0 );
 
+add_action( 'add_meta_boxes', 'kfp_receta_register_meta_boxes' );
 /**
  * Registra tres Meta Box en el Custom Post Type Receta
  * https://code.tutsplus.com/tutorials/create-a-simple-crm-in-wordpress-creating-custom-fields--cms-20048
@@ -109,7 +112,7 @@ function kfp_receta_register_meta_boxes() {
 	add_meta_box(
 		'receta-imagen',
 		'Imagen',
-		'kfp_receta_imagen_output_meta_box', 
+		'kfp_receta_imagen_output_meta_box',
 		'receta',
 		'normal',
 		'high'
@@ -117,7 +120,7 @@ function kfp_receta_register_meta_boxes() {
 }
 
 /**
- * Output a Contact Details meta box
+ * Muestra meta box con tiempo de preparación y número de comensales
  *
  * @param WP_Post $post WordPress Post object.
  */
@@ -125,16 +128,27 @@ function kfp_receta_info_output_meta_box( $post ) {
 	$tiempo_preparacion = $post->_tiempo_preparacion;
 	$comensales         = $post->_comensales;
 	wp_nonce_field( 'graba_receta', 'receta_nonce' );
-	echo( '<label for="tiempo_preparacion">' . __( 'Tiempo de preparación', 'kfp-recetas' ) . '</label>' );
-	echo( '&nbsp; <input type="text" name="tiempo_preparacion" id="tiempo_preparacion" value="' . esc_attr( $tiempo_preparacion ) . '">' );
-	echo( '<p><label for="comensales">' . __( 'Comensales', 'kfp-recetas' ) . '</label>' );
-	echo( '&nbsp; <input type="number" name="comensales" id="comensales" value="' . esc_attr( $comensales ) . '">' );
+	$html  = '<label for="tiempo_preparacion">';
+	$html .= esc_html__( 'Tiempo de preparación', 'kfp-recetas' ) . '</label>';
+	$html .= '&nbsp; <input type="text" name="tiempo_preparacion" ';
+	$html .= 'id="tiempo_preparacion" value="' . esc_attr( $tiempo_preparacion ) . '">';
+	$html .= '<p><label for="comensales">' . esc_html__( 'Comensales', 'kfp-recetas' );
+	$html .= '</label> &nbsp; ';
+	$html .= '<input type="number" name="comensales" id="comensales" value="';
+	$html .= esc_attr( $comensales ) . '">';
+	echo $html;
 }
 
+/**
+ * Muestra el meta box con los ingredientes, en formato tinyMCE
+ *
+ * @param Post $post
+ * @return void
+ */
 function kfp_receta_ingredientes_output_meta_box( $post ) {
 	// Cuidado, aquí parece que hay que usar la función y no la propiedad del objeto: $post->_ingredientes.
 	$ingredientes = get_post_meta( $post->ID, '_ingredientes', true );
-	echo( '<div id="postdivrich" class="postarea">' );
+	echo '<div id="postdivrich" class="postarea">';
 	wp_editor(
 		$ingredientes,
 		'ingredientes',
@@ -148,46 +162,64 @@ function kfp_receta_ingredientes_output_meta_box( $post ) {
 			),
 		)
 	);
-	echo( '</div>' );
+	echo '</div>';
 }
 
+/**
+ * Muestra el meta box con los preparativos, en formato tinyMCE
+ *
+ * @param Post $post
+ * @return void
+ */
 function kfp_receta_preparacion_output_meta_box( $post ) {
 	// Cuidado, aquí parece que hay que usar la función y no la propiedad del objeto: $post->_ingredientes.
 	$preparacion = get_post_meta( $post->ID, '_preparacion', true );
 
-	echo( '<div id="postdivrich" class="postarea">' );
-	wp_editor( $preparacion, 'preparacion', array(
-		'drag_drop_upload'  => true,
-		'tabfocus_elements' => 'content-html,save-post',
-		'editor_height'     => 200,
-		'tinymce'           => array(
-			'resize'             => false,
-			'add_unload_trigger' => false,
-		),
-	) );
-	echo( '</div>' );
+	echo '<div id="postdivrich" class="postarea">';
+	wp_editor(
+		$preparacion,
+		'preparacion',
+		array(
+			'drag_drop_upload'  => true,
+			'tabfocus_elements' => 'content-html,save-post',
+			'editor_height'     => 200,
+			'tinymce'           => array(
+				'resize'             => false,
+				'add_unload_trigger' => false,
+			),
+		)
+	);
+	echo '</div>';
 }
 
-function kfp_receta_imagen_output_meta_box ($post) {
+/**
+ * Muestra el meta box para introducir una imagen
+ *
+ * @param Post $post
+ * @return void
+ */
+function kfp_receta_imagen_output_meta_box( $post ) {
 	$imagen = $post->_imagen;
-	wp_nonce_field( 'graba_receta', 'receta_nonce' );
-	echo '<label for="imagen">' . __( 'Imagen', 'kfp-recetas' ) . '</label>';
-	echo '<input id="imagen" type="text" size="36" name="imagen" value="' . esc_attr( $imagen ) . '" >';
-	echo '<input id="boton_imagen" class="button" type="button" value="' . __( 'Subir Imagen', 'kfp-recetas' ) . '" >';
-	echo '<br>' . __( 'Introduce URL o sube una imagen', 'kfp-recetas' );
+
+	$html  = '<label for="imagen">' . esc_html__( 'Imagen', 'kfp-recetas' ) . '</label>';
+	$html .= '<input id="imagen" type="text" size="36" name="imagen" value="';
+	$html .= esc_attr( $imagen ) . '" >';
+	$html .= '<input id="boton_imagen" class="button" type="button" value="';
+	$html .= esc_html__( 'Subir Imagen', 'kfp-recetas' ) . '" >';
+	$html .= '<br>' . esc_html__( 'Introduce URL o sube una imagen', 'kfp-recetas' );
+	echo $html;
 }
 
-add_action( 'add_meta_boxes', 'kfp_receta_register_meta_boxes' );
-
+add_action( 'save_post', 'kfp_receta_save_meta_boxes' );
 /**
  * Graba los campos personalizados que vienen del formulario de edición del post
  *
- * @param int $post_id Post ID
+ * @param int $post_id Post ID.
  *
  * @return bool|int
  */
 function kfp_receta_save_meta_boxes( $post_id ) {
-	// Comprobamos que el nonce es correcto para evitar ataques CSRF
+	// Comprueba que el nonce es correcto para evitar ataques CSRF.
 	if ( ! isset( $_POST['receta_nonce'] ) || ! wp_verify_nonce( $_POST['receta_nonce'], 'graba_receta' ) ) {
 		return $post_id;
 	}
@@ -221,8 +253,7 @@ function kfp_receta_save_meta_boxes( $post_id ) {
 	return true;
 }
 
-add_action( 'save_post', 'kfp_receta_save_meta_boxes' );
-
+add_filter( 'the_content', 'kfp_receta_add_custom_fields_to_content' );
 /**
  * Agrega los custom fields al contenido de las receta
  * Observa que los Custom Fields se devuelven como array (por si hay más de uno)
@@ -232,7 +263,6 @@ add_action( 'save_post', 'kfp_receta_save_meta_boxes' );
  * @return string
  */
 function kfp_receta_add_custom_fields_to_content( $content ) {
-
 	$custom_fields = get_post_custom();
 
 	if ( isset ( $custom_fields['_imagen'] ) ) {
@@ -240,35 +270,35 @@ function kfp_receta_add_custom_fields_to_content( $content ) {
 	}
 	$content .= '<ul>';
 	if ( isset( $custom_fields['_tiempo_preparacion'] ) ) {
-		$content .= '<li><b>' . __( 'Tiempo de preparación', 'kfp-recetas' ) . ':</b> ' . $custom_fields['_tiempo_preparacion'][0] . '</li>';
+		$content .= '<li><b>' . __( 'Tiempo de preparación', 'kfp-recetas' );
+		$content .= ':</b> ' . $custom_fields['_tiempo_preparacion'][0] . '</li>';
 	}
 	if ( isset( $custom_fields['_comensales'] ) ) {
-		$content .= '<li><b>' . __( 'Comensales', 'kfp-recetas' ) . ':</b> ' . $custom_fields['_comensales'][0] . '</li>';
+		$content .= '<li><b>' . __( 'Comensales', 'kfp-recetas' ) . ':</b> ';
+		$content .= $custom_fields['_comensales'][0] . '</li>';
 	}
 	$content .= '</ul>';
-
 	if ( isset ( $custom_fields['_ingredientes'] ) ) {
-		$content .= '<h3>' . __( 'Ingredientes', 'kfp-recetas' ) . '</h3><div>' . $custom_fields['_ingredientes'][0] . '</div>';
+		$content .= '<h3>' . __( 'Ingredientes', 'kfp-recetas' ) . '</h3><div>';
+		$content .= $custom_fields['_ingredientes'][0] . '</div>';
 	}
-
 	if ( isset ( $custom_fields['_preparacion'] ) ) {
-		$content .= '<h3>' . __( 'Preparación', 'kfp-recetas' ) . '</h3><div>' . $custom_fields['_preparacion'][0] . '</div>';
+		$content .= '<h3>' . __( 'Preparación', 'kfp-recetas' ) . '</h3><div>';
+		$content .= $custom_fields['_preparacion'][0] . '</div>';
 	}
 
 	return $content;
 }
 
-add_filter( 'the_content', 'kfp_receta_add_custom_fields_to_content' );
-
+add_filter( 'pre_get_posts', 'get_posts_y_recetas' );
 /**
  * Agrega el tipo personalizado Receta a la página inicial de WP
  *
- * @param $query
+ * @param Query $query
  *
- * @return mixed
+ * @return Query
  */
 function get_posts_y_recetas( $query ) {
-
 	if ( is_home() && $query->is_main_query() ) {
 		$query->set( 'post_type', array( 'post', 'receta' ) );
 	}
@@ -276,8 +306,7 @@ function get_posts_y_recetas( $query ) {
 	return $query;
 }
 
-add_filter( 'pre_get_posts', 'get_posts_y_recetas' );
-
+add_action( 'init', 'taxonomia_tipo_receta' );
 /**
  * Registra una taxonomía para las recetas
  */
@@ -308,14 +337,16 @@ function taxonomia_tipo_receta() {
 	register_taxonomy( 'tipo-comida', array( 'recetas' ), $args );
 }
 
-add_action( 'init', 'taxonomia_tipo_receta' );
-
 add_action('admin_enqueue_scripts', 'kfp_recetas_admin_scripts');
- 
+/**
+ * Agrega el script que crea la conexión entre el campo imagen y el media uploader
+ *
+ * @return void
+ */
 function kfp_recetas_admin_scripts() {
-    if (is_admin()) {
-        wp_enqueue_media();
-        wp_register_script('kfp-recetas-admin-js', WP_PLUGIN_URL.'/kfp-recetas/js/admin.js', array('jquery'));
-        wp_enqueue_script('kfp-recetas-admin-js');
-    }
+	if (is_admin()) {
+		wp_enqueue_media();
+		wp_register_script( 'kfp-recetas-admin-js', KFP_RECETA_PLUGIN_URL . '/js/admin.js', array( 'jquery' ) );
+		wp_enqueue_script( 'kfp-recetas-admin-js' );
+	}
 }
