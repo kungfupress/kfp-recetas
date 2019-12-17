@@ -13,7 +13,7 @@ global $content;
 global $post;
 global $query;
 
-define( 'KFP_RECETA_PLUGIN_URL', WP_PLUGIN_URL . '/kfp-recetas' );
+define( 'KFP_RECETA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 add_action( 'init', 'kfp_receta_register_post_type', 0 );
 /**
@@ -346,7 +346,7 @@ add_action('admin_enqueue_scripts', 'kfp_recetas_admin_scripts');
 function kfp_recetas_admin_scripts() {
 	if (is_admin()) {
 		wp_enqueue_media();
-		wp_register_script( 'kfp-recetas-admin-js', KFP_RECETA_PLUGIN_URL . '/js/admin.js', array( 'jquery' ) );
+		wp_register_script( 'kfp-recetas-admin-js', KFP_RECETA_PLUGIN_URL . 'js/admin.js', array( 'jquery' ) );
 		wp_enqueue_script( 'kfp-recetas-admin-js' );
 	}
 }
