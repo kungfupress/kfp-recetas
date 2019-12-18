@@ -117,6 +117,14 @@ function kfp_receta_register_meta_boxes() {
 		'normal',
 		'high'
 	);
+	add_meta_box(
+		'receta-galeria',
+		'Galería',
+		'kfp_receta_galeria_output_meta_box',
+		'receta',
+		'normal',
+		'high'
+	);
 }
 
 /**
@@ -202,11 +210,28 @@ function kfp_receta_imagen_output_meta_box( $post ) {
 	$imagen = $post->_imagen;
 
 	$html  = '<label for="imagen">' . esc_html__( 'Imagen', 'kfp-recetas' ) . '</label>';
-	$html .= '<input id="imagen" type="text" size="36" name="imagen" value="';
+	$html .= '&nbsp; <input id="imagen" type="text" size="36" name="imagen" value="';
 	$html .= esc_attr( $imagen ) . '" >';
 	$html .= '<input id="boton_imagen" class="button" type="button" value="';
 	$html .= esc_html__( 'Subir Imagen', 'kfp-recetas' ) . '" >';
 	$html .= '<br>' . esc_html__( 'Introduce URL o sube una imagen', 'kfp-recetas' );
+	echo $html;
+}
+
+/**
+ * Muestra el meta box para introducir una imagen
+ *
+ * @param Post $post
+ * @return void
+ */
+function kfp_receta_galeria_output_meta_box( $post ) {
+	$galeria = $post->_galeria;
+
+	$html  = '<label for="galeria">' . esc_html__( 'Galería de fotos', 'kfp-recetas' ) . '</label>';
+	$html .= '&nbsp; <input id="galeria" type="text" size="36" name="galeria" value="';
+	$html .= esc_attr( $galeria ) . '" >';
+	$html .= '<input id="boton_galeria" class="button" type="button" value="';
+	$html .= esc_html__( 'Crear galería', 'kfp-recetas' ) . '" >';
 	echo $html;
 }
 
@@ -249,7 +274,9 @@ function kfp_receta_save_meta_boxes( $post_id ) {
 	update_post_meta( $post_id, '_preparacion', $preparacion );
 	$imagen = sanitize_url( $_POST['imagen'] );
 	update_post_meta( $post_id, '_imagen', $imagen );
-
+	$galeria = sanitize_text_field( $_POST['galeria'] );
+	update_post_meta( $post_id, '_galeria', $galeria );
+	
 	return true;
 }
 
@@ -267,6 +294,9 @@ function kfp_receta_add_custom_fields_to_content( $content ) {
 
 	if ( isset ( $custom_fields['_imagen'] ) ) {
 		$content .= '<img src="' . $custom_fields['_imagen'][0] . '" alt="foto receta">';
+	}
+	if ( isset ( $custom_fields['_galeria'] ) ) {
+		$content .= '<div>' . $custom_fields['_galeria'][0] . '</div>';
 	}
 	$content .= '<ul>';
 	if ( isset( $custom_fields['_tiempo_preparacion'] ) ) {
