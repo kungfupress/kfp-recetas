@@ -225,9 +225,17 @@ function kfp_receta_imagen_output_meta_box( $post ) {
  * @return void
  */
 function kfp_receta_galeria_output_meta_box( $post ) {
-	$galeria = $post->_galeria;
+	$galeria     = $post->_galeria;
+	$galeria_ids = explode( ',', $galeria );
 
 	$html  = '<label for="galeria">' . esc_html__( 'Galería de fotos', 'kfp-recetas' ) . '</label>';
+	$html .= '<div id="vista-previa-galeria">';
+	foreach ( $galeria_ids as $attachment_id ) {
+		$img   = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
+		$html .= '<div class="screen-thumb"><img src="';
+		$html .= esc_url( $img[0] ) . '" /></div>';
+	}
+	$html .= '</div>';
 	$html .= '&nbsp; <input id="galeria" type="text" size="36" name="galeria" value="';
 	$html .= esc_attr( $galeria ) . '" >';
 	$html .= '<input id="boton_galeria" class="button" type="button" value="';
@@ -291,11 +299,18 @@ add_filter( 'the_content', 'kfp_receta_add_custom_fields_to_content' );
  */
 function kfp_receta_add_custom_fields_to_content( $content ) {
 	$custom_fields = get_post_custom();
-
 	if ( isset ( $custom_fields['_imagen'] ) ) {
 		$content .= '<img src="' . $custom_fields['_imagen'][0] . '" alt="foto receta">';
 	}
 	if ( isset ( $custom_fields['_galeria'] ) ) {
+		$galeria_ids = explode(',', $custom_fields['_galeria'][0]);
+		$content .= '<div id="vista-previa-galeria">';
+		foreach ($galeria_ids as $attachment_id) {
+			$img = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
+			$content .= '<div class="screen-thumb"><img src="';
+			$content .= esc_url( $img[0] ) . '" /></div>';
+		}
+		$content .= '</div>';
 		$content .= '<div>' . $custom_fields['_galeria'][0] . '</div>';
 	}
 	$content .= '<ul>';
@@ -369,13 +384,13 @@ function taxonomia_tipo_receta() {
 
 add_action('admin_enqueue_scripts', 'kfp_recetas_admin_scripts');
 /**
- * Agrega el script que crea la conexión entre el campo imagen y el media uploader
+ * Agrega el script que crea la conexión entre los campos de imagen o galería y el media uploader
  *
  * @return void
  */
 function kfp_recetas_admin_scripts() {
 	if (is_admin()) {
-		wp_enqueue_media();
+		wp_enqueue_media(); //Carga la API de JavaScript para utilizar wp.media
 		wp_register_script( 'kfp-recetas-admin-js', KFP_RECETA_PLUGIN_URL . 'js/admin.js', array( 'jquery' ) );
 		wp_enqueue_script( 'kfp-recetas-admin-js' );
 	}

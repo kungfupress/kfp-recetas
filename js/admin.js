@@ -1,15 +1,15 @@
 jQuery(document).ready(function($){
-	var custom_uploader;
+	var meta_image_frame;
 	var meta_gallery_frame;
 	$('#boton_imagen').click(function(e) {
 		e.preventDefault();
 		//If the uploader object has already been created, reopen the dialog
-		if (custom_uploader) {
-			custom_uploader.open();
+		if (meta_image_frame) {
+			meta_image_frame.open();
 			return;
 		}
 		//Extend the wp.media object
-		custom_uploader = wp.media.frames.file_frame = wp.media({
+		meta_image_frame = wp.media.frames.file_frame = wp.media({
 			title: 'Selecciona Imagen',
 			button: {
 				text: 'Selecciona Imagen'
@@ -17,12 +17,12 @@ jQuery(document).ready(function($){
 			multiple: false
 		});
 		//When a file is selected, grab the URL and set it as the text field's value
-		custom_uploader.on('select', function() {
-			attachment = custom_uploader.state().get('selection').first().toJSON();
+		meta_image_frame.on('select', function() {
+			attachment = meta_image_frame.state().get('selection').first().toJSON();
 			$('#imagen').val(attachment.url);
 		});
 		//Open the uploader dialog
-		custom_uploader.open();
+		meta_image_frame.open();
 	});
 
 	$('#boton_galeria').click(function(e) {
@@ -32,7 +32,6 @@ jQuery(document).ready(function($){
             meta_gallery_frame.open();
             return;
         }
-
         // Sets up the media library frame
         meta_gallery_frame = wp.media.frames.wp_media_frame = wp.media( {
 			title: 'Galería de fotos',
@@ -43,5 +42,23 @@ jQuery(document).ready(function($){
 			},
 			multiple: true
 		} );
+
+		meta_gallery_frame.on("update", function(selection) {
+			var ids = selection.models.map(
+				function( e ) {
+					/*element = e.toJSON();
+					preview_img = typeof element.sizes.thumbnail !== 'undefined' ? element.sizes.thumbnail.url : element.url;
+					preview_html = "<div class='screen-thumb'><img src='" + preview_img + "'/></div>";
+					current_gallery.find( '.gallery-screenshot' ).append( preview_html );*/
+					return e.id;
+				}
+			);
+			console.log(ids.join( ',' ));
+			$( '#galeria' ).val( ids.join( ',' ) ).trigger( 'change' );
+
+			//console.log(meta_gallery_frame.state().get('selection'));
+			//$('galeria').val(wp.media.gallery.shortcode(e).string());
+		});
+
 	});
 });
