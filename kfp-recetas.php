@@ -209,8 +209,7 @@ function kfp_receta_preparacion_show_meta_box( $post ) {
 function kfp_receta_imagen_show_meta_box( $post ) {
 	$imagen = $post->_imagen;
 
-	$html  = '<label for="imagen">' . esc_html__( 'Imagen', 'kfp-recetas' ) . '</label>';
-	$html .= '&nbsp; <input id="imagen" type="text" size="36" name="imagen" value="';
+	$html  = '<input id="imagen" type="text" size="36" name="imagen" value="';
 	$html .= esc_attr( $imagen ) . '" >';
 	$html .= '<input id="boton_imagen" class="button" type="button" value="';
 	$html .= esc_html__( 'Subir Imagen', 'kfp-recetas' ) . '" >';
@@ -228,18 +227,19 @@ function kfp_receta_galeria_show_meta_box( $post ) {
 	$galeria     = $post->_galeria;
 	$galeria_ids = explode( ',', $galeria );
 
-	$html  = '<label for="galeria">' . esc_html__( 'Galería de fotos', 'kfp-recetas' ) . '</label>';
-	$html .= '<div id="vista-previa-galeria">';
+	$html = '<div class="mb-vista-previa-galeria">';
 	foreach ( $galeria_ids as $attachment_id ) {
 		$img   = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
-		$html .= '<div class="screen-thumb"><img src="';
+		$html .= '<div class="mb-miniatura-galeria"><img src="';
 		$html .= esc_url( $img[0] ) . '" /></div>';
 	}
 	$html .= '</div>';
-	$html .= '&nbsp; <input id="galeria" type="text" size="36" name="galeria" value="';
+	$html .= '<input id="galeria" type="text" size="36" name="galeria" value="';
 	$html .= esc_attr( $galeria ) . '" >';
+	$html .= '<div class="mb-botonera-galeria">';
 	$html .= '<input id="boton_galeria" class="button" type="button" value="';
 	$html .= esc_html__( 'Crear galería', 'kfp-recetas' ) . '" >';
+	$html .= '</div>';
 	echo $html;
 }
 
@@ -307,7 +307,7 @@ function kfp_receta_add_custom_fields_to_content( $content ) {
 		$content .= '<div id="vista-previa-galeria">';
 		foreach ($galeria_ids as $attachment_id) {
 			$img = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
-			$content .= '<div class="screen-thumb"><img src="';
+			$content .= '<div class="miniatura-galeria"><img src="';
 			$content .= esc_url( $img[0] ) . '" /></div>';
 		}
 		$content .= '</div>';
@@ -393,5 +393,6 @@ function kfp_recetas_admin_scripts() {
 		wp_enqueue_media(); //Carga la API de JavaScript para utilizar wp.media
 		wp_register_script( 'kfp-recetas-admin-js', KFP_RECETA_PLUGIN_URL . 'js/admin.js', array( 'jquery' ) );
 		wp_enqueue_script( 'kfp-recetas-admin-js' );
+		wp_enqueue_style('kfp-recetas-admin-css', KFP_RECETA_PLUGIN_URL . 'css/admin.css');
 	}
 }
