@@ -88,7 +88,7 @@ function kfp_receta_register_meta_boxes() {
 	add_meta_box(
 		'receta-info',
 		'Informacion',
-		'kfp_receta_info_output_meta_box',
+		'kfp_receta_info_show_meta_box',
 		'receta',
 		'normal',
 		'high'
@@ -96,7 +96,7 @@ function kfp_receta_register_meta_boxes() {
 	add_meta_box(
 		'receta-ingredientes',
 		'Ingredientes',
-		'kfp_receta_ingredientes_output_meta_box',
+		'kfp_receta_ingredientes_show_meta_box',
 		'receta',
 		'normal',
 		'high'
@@ -104,7 +104,7 @@ function kfp_receta_register_meta_boxes() {
 	add_meta_box(
 		'receta-preparacion',
 		'Preparación',
-		'kfp_receta_preparacion_output_meta_box', 
+		'kfp_receta_preparacion_show_meta_box', 
 		'receta',
 		'normal',
 		'high'
@@ -112,7 +112,7 @@ function kfp_receta_register_meta_boxes() {
 	add_meta_box(
 		'receta-imagen',
 		'Imagen',
-		'kfp_receta_imagen_output_meta_box',
+		'kfp_receta_imagen_show_meta_box',
 		'receta',
 		'normal',
 		'high'
@@ -120,7 +120,7 @@ function kfp_receta_register_meta_boxes() {
 	add_meta_box(
 		'receta-galeria',
 		'Galería',
-		'kfp_receta_galeria_output_meta_box',
+		'kfp_receta_galeria_show_meta_box',
 		'receta',
 		'normal',
 		'high'
@@ -132,7 +132,7 @@ function kfp_receta_register_meta_boxes() {
  *
  * @param WP_Post $post WordPress Post object.
  */
-function kfp_receta_info_output_meta_box( $post ) {
+function kfp_receta_info_show_meta_box( $post ) {
 	$tiempo_preparacion = $post->_tiempo_preparacion;
 	$comensales         = $post->_comensales;
 	wp_nonce_field( 'graba_receta', 'receta_nonce' );
@@ -153,7 +153,7 @@ function kfp_receta_info_output_meta_box( $post ) {
  * @param Post $post
  * @return void
  */
-function kfp_receta_ingredientes_output_meta_box( $post ) {
+function kfp_receta_ingredientes_show_meta_box( $post ) {
 	// Cuidado, aquí parece que hay que usar la función y no la propiedad del objeto: $post->_ingredientes.
 	$ingredientes = get_post_meta( $post->ID, '_ingredientes', true );
 	echo '<div id="postdivrich" class="postarea">';
@@ -179,7 +179,7 @@ function kfp_receta_ingredientes_output_meta_box( $post ) {
  * @param Post $post
  * @return void
  */
-function kfp_receta_preparacion_output_meta_box( $post ) {
+function kfp_receta_preparacion_show_meta_box( $post ) {
 	// Cuidado, aquí parece que hay que usar la función y no la propiedad del objeto: $post->_ingredientes.
 	$preparacion = get_post_meta( $post->ID, '_preparacion', true );
 
@@ -206,7 +206,7 @@ function kfp_receta_preparacion_output_meta_box( $post ) {
  * @param Post $post
  * @return void
  */
-function kfp_receta_imagen_output_meta_box( $post ) {
+function kfp_receta_imagen_show_meta_box( $post ) {
 	$imagen = $post->_imagen;
 
 	$html  = '<label for="imagen">' . esc_html__( 'Imagen', 'kfp-recetas' ) . '</label>';
@@ -224,7 +224,7 @@ function kfp_receta_imagen_output_meta_box( $post ) {
  * @param Post $post
  * @return void
  */
-function kfp_receta_galeria_output_meta_box( $post ) {
+function kfp_receta_galeria_show_meta_box( $post ) {
 	$galeria     = $post->_galeria;
 	$galeria_ids = explode( ',', $galeria );
 
