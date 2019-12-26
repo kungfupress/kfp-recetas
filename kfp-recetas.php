@@ -224,21 +224,24 @@ function kfp_receta_imagen_show_meta_box( $post ) {
  * @return void
  */
 function kfp_receta_galeria_show_meta_box( $post ) {
-	$galeria     = $post->_galeria;
-	$galeria_ids = explode( ',', $galeria );
-
-	$html = '<div class="mb-vista-previa-galeria">';
-	foreach ( $galeria_ids as $attachment_id ) {
-		$img   = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
-		$html .= '<div class="mb-miniatura-galeria"><img src="';
-		$html .= esc_url( $img[0] ) . '" /></div>';
+	$galeria = $post->_galeria;
+	$html    = '<div id="mb-vista-previa-galeria">';
+	if ( ! empty( $galeria ) ) {
+		$galeria_ids = explode( ',', $galeria );
+		foreach ( $galeria_ids as $attachment_id ) {
+			$img   = wp_get_attachment_image_src( $attachment_id, 'thumbnail' );
+			$html .= '<div class="mb-miniatura-galeria"><img src="';
+			$html .= esc_url( $img[0] ) . '" /></div>';
+		}
 	}
 	$html .= '</div>';
-	$html .= '<input id="galeria" type="text" size="36" name="galeria" value="';
+	$html .= '<input id="ids_galeria" type="hidden" size="36" name="galeria" value="';
 	$html .= esc_attr( $galeria ) . '" >';
 	$html .= '<div class="mb-botonera-galeria">';
-	$html .= '<input id="boton_galeria" class="button" type="button" value="';
-	$html .= esc_html__( 'Crear galería', 'kfp-recetas' ) . '" >';
+	$html .= '<input id="boton_crear_galeria" class="button" type="button" value="';
+	$html .= esc_html__( 'Crear/editar galería', 'kfp-recetas' ) . '" >';
+	$html .= '<input id="boton_eliminar_galeria" class="button" type="button" value="';
+	$html .= esc_html__( 'Eliminar galería', 'kfp-recetas' ) . '" >';
 	$html .= '</div>';
 	echo $html;
 }
