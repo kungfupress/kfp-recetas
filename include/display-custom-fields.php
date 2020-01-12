@@ -13,7 +13,7 @@ add_filter( 'the_content', 'kfp_receta_display_custom_fields' );
  * Observa que los Custom Fields se devuelven como array (por si hay más de uno)
  * Por ello al llamarlos hay que cargar el primer elemento del array con [0]
  *
- * @param $content
+ * @param $content Contenido del custom post actual.
  * @return string
  */
 function kfp_receta_display_custom_fields( $content ) {
@@ -30,7 +30,6 @@ function kfp_receta_display_custom_fields( $content ) {
 			$content .= esc_url( $img[0] ) . '" /></div>';
 		}
 		$content .= '</div>';
-		$content .= '<div>' . $custom_fields['_galeria'][0] . '</div>';
 	}
 	$content .= '<ul>';
 	if ( isset( $custom_fields['_tiempo_preparacion'] ) ) {
